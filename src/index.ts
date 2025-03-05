@@ -1,35 +1,35 @@
 import express from 'express';
 import cors from 'cors';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { typeDefs } from './typeDefs/typeDefs.js';
-import { userResolver } from './resolvers/userResolver';
-import { avatarResolver } from './resolvers/avatarResolver';
-import { ResolverContext } from './types/types';
 import { connectDB } from './db';
 import passport from 'passport';
 import session from 'express-session';
-import { IUser } from './entities/User.js';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import hpp from 'hpp';
+import { StatusCodes } from 'http-status-codes';
+import morgan from 'morgan';
+import { logger } from './config/logger';
+import { limiter } from './config/rateLimiter';
 
 const app = express();
 const port = process.env.PORT || 4000;
 
 const bootstrapServer = async () => {
-  await connectDB(); // Connect to MongoDB
+  await connectDB();
 
-  const server = new ApolloServer<ResolverContext>({
-    typeDefs,
-    resolvers: [userResolver, avatarResolver],
-  });
-  await server.start();
-
+  // Apply middleware
+  app.use(helmet()); // Helmet for security headers
+  app.use(hpp()); // Protect against HTTP Parameter Pollution attacks
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser()); // Parse cookies
+  app.use(morgan('combined')); // HTTP request logger
+  app.use(limiter); // Apply rate limiting to all requests
 
   app.use(
     session({
-      secret: 'secret',
+      secret: 'your-secret-key',
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 * 60 },
@@ -39,26 +39,12 @@ const bootstrapServer = async () => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.use(
-    '/graphql',
-    expressMiddleware(server, {
-      context: async ({ req, res }): Promise<ResolverContext> => ({
-        req,
-        res,
-        user: req.user as IUser,
-      }),
-    })
-  );
-
   app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.status(StatusCodes.OK).send('Hello World!');
   });
 
   app.listen(port, () => {
-    console.log(`🚀 Express is ready at http://localhost:${port}`);
-    console.log(
-      `🚀 GraphQL ready at http://localhost:${port}/graphql`
-    );
+    logger.info(`🚀 API is ready at http://localhost:${port}`);
   });
 };
 
