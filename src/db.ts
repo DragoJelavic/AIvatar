@@ -1,16 +1,17 @@
 import mongoose from 'mongoose';
+import { logger } from './config/logger';
 
 const MONGO_URI =
   process.env.MONGO_URI || 'mongodb://admin:password@localhost:27017';
 
-export const connectDB = async () => {
+export const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(MONGO_URI, {
       authSource: 'admin',
     });
-    console.log('✅ Connected to MongoDB');
+    logger.info('✅ Connected to MongoDB');
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    logger.error('❌ MongoDB connection error:', error);
     process.exit(1);
   }
 };
