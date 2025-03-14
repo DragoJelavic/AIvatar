@@ -15,6 +15,7 @@ import swaggerUi from 'swagger-ui-express';
 import passport from './auth/strategies/local-strategy';
 import { errorHandler } from './middlewares/errorHandler';
 import { startJobs } from './jobs/job-runner';
+import userRouter from './routes/user';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -51,6 +52,7 @@ const bootstrapServer = async () => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.use('/api/auth', authRouter);
+  app.use('/api/user', userRouter);
 
   app.use(errorHandler);
 

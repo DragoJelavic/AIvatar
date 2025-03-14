@@ -1,0 +1,27 @@
+### User profile
+GET http://localhost:4000/api/user/profile HTTP/1.1
+content-type: application/json
+
+### Update user profile
+PATCH http://localhost:4000/api/user/profile HTTP/1.1
+content-type: application/json
+
+{
+    "name": "Updated Name",
+    "profilePicture": "https://example.com/new-pic.jpg",
+    "dateOfBirth": "1990-01-01",
+    "bio": "Updated bio text",
+    "location": "New Location",
+    "phoneNumber": "+1234567890",
+    "socialLinks": {
+        "twitter": "https://twitter.com/newhandle",
+        "facebook": "https://facebook.com/newfbprofile",
+        "instagram": "https://instagram.com/newighandle",
+        "linkedin": "https://linkedin.com/in/newprofile"
+    },
+    "preferences": {
+        "theme": "light",
+        "notifications": true
+    }
+}
+
